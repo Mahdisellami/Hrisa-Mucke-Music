@@ -4,7 +4,7 @@ from utils.file_ops import read_data, write_data
 from models.schemas import Song
 from utils.database import get_db
 from sqlalchemy.orm import Session
-from models.db_models import Song as DBSong
+from models.db_models import Track as DBSong
 import subprocess
 from pathlib import Path
 from pytubefix import YouTube, Search
