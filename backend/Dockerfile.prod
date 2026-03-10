@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 # Cache bust argument
-ARG CACHEBUST=2026-03-10-20:40:00
+ARG CACHEBUST=2026-03-10-21:11:00
 
 # Set working directory
 WORKDIR /app
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements - FORCE REBUILD
-# Cache bust: 2026-03-10-20:40:00
+# Cache bust: 2026-03-10-21:11:00
 COPY requirements.txt .
 RUN echo "Cache bust: ${CACHEBUST}"
 RUN pip install --no-cache-dir --upgrade pip
@@ -33,6 +33,11 @@ COPY . .
 
 # Create data directory for SQLite and MP3s
 RUN mkdir -p /app/data
+
+# Verify main.py exists and can be imported
+RUN ls -la /app/main.py && \
+    python -c "import sys; print('Python path:', sys.path)" && \
+    python -c "import main; print('✓ main module can be imported')"
 
 # Expose port (Render provides PORT env var)
 EXPOSE 8000
