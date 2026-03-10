@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 # Cache bust argument
-ARG CACHEBUST=2026-03-10-21:11:00
+ARG CACHEBUST=2026-03-10-21:17:00
 
 # Set working directory
 WORKDIR /app
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements - FORCE REBUILD
-# Cache bust: 2026-03-10-21:11:00
+# Cache bust: 2026-03-10-21:17:00
 COPY requirements.txt .
 RUN echo "Cache bust: ${CACHEBUST}"
 RUN pip install --no-cache-dir --upgrade pip
