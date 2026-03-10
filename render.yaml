@@ -21,10 +21,10 @@ services:
         value: 7
       - key: ALLOWED_ORIGINS
         sync: false
-    disk:
-      name: music-data
-      mountPath: /app/data
-      sizeGB: 10
+
+# Note: Free tier does not support persistent disks
+# Database will be ephemeral and reset on redeployments
+# For persistent storage, upgrade to a paid plan ($7/month for Starter)
 
 # Optional: Add PostgreSQL database if you want to migrate from SQLite
 # databases:
