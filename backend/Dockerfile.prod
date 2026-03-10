@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 
+# Cache bust argument
+ARG CACHEBUST=2026-03-10-19:15:00
+
 # Set working directory
 WORKDIR /app
 
@@ -9,10 +12,13 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
-# Updated 2026-03-10: Force rebuild to include all deps
+# Copy requirements - FORCE REBUILD
+# Cache bust: 2026-03-10-19:15:00
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN echo "Cache bust: ${CACHEBUST}" && \
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip list | grep uvicorn
 
 # Copy backend code
 COPY . .
