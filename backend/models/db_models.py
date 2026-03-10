@@ -254,7 +254,7 @@ class ActivityFeed(Base):
     playlist_id = Column(Integer, ForeignKey("playlists.id"))
     target_user_id = Column(Integer, ForeignKey("users.id"))
 
-    metadata = Column(Text)  # JSON string for flexible data
+    activity_metadata = Column(Text)  # JSON string for flexible data
 
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
