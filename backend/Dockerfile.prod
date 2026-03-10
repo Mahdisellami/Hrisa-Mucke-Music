@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
+# Updated 2026-03-10: Force rebuild to include all deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

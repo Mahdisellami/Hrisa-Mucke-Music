@@ -1,6 +1,9 @@
+# Web Framework
 fastapi
-uvicorn
+uvicorn[standard]
 requests
+
+# YouTube & Media Processing
 pytubefix==10.1.1
 moviepy==2.2.1
 mutagen==1.46.0
