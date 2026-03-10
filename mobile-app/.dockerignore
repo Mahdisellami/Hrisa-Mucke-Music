@@ -1,0 +1,18 @@
+# Node / Expo
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Expo / React Native
+.expo
+.expo-shared
+
+# TypeScript
+*.tsbuildinfo
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log

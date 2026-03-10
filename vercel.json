@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "name": "music-tool-web",
+  "buildCommand": "cd mobile-app && npm install && npx expo export:web",
+  "outputDirectory": "mobile-app/dist",
+  "devCommand": "cd mobile-app && npm start",
+  "installCommand": "cd mobile-app && npm install",
+  "framework": null,
+  "env": {
+    "EXPO_PUBLIC_API_URL": "@api_url"
+  },
+  "build": {
+    "env": {
+      "EXPO_PUBLIC_API_URL": "@api_url"
+    }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
