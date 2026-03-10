@@ -1,22 +1,16 @@
-# Cache bust: 2026-03-10-19:15:00
-# Dependencies for Music Tool Backend
-# Reordered to force Docker rebuild
+# CRITICAL: Install web framework first
+fastapi
+uvicorn[standard]
+requests
 
-# Core Web Framework - MUST INSTALL
-uvicorn[standard]>=0.27.0
-fastapi>=0.109.0
-requests>=2.31.0
+# Database & Authentication
+sqlalchemy
+psycopg2-binary
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic[email]
 
-# Authentication & Security
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
-pydantic[email]>=2.0.0
-
-# Database
-sqlalchemy>=2.0.0
-psycopg2-binary>=2.9.9
-
-# Media Processing
+# YouTube & Media Processing
 pytubefix==10.1.1
 moviepy==2.2.1
 mutagen==1.46.0
