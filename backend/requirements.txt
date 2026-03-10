@@ -10,3 +10,4 @@ sqlalchemy
 psycopg2-binary  # PostgreSQL adapter for production
 python-jose[cryptography]
 passlib[bcrypt]
+pydantic[email]  # For EmailStr validation

@@ -7,7 +7,7 @@ from sqlalchemy import and_
 
 from utils.auth import get_current_user
 from utils.database import get_db
-from models.db_models import Playlist, PlaylistSong, Song, User
+from models.db_models import Playlist, PlaylistTrack, Track, User
 
 router = APIRouter(prefix="/playlists", tags=["playlists"])
 
@@ -61,8 +61,8 @@ async def get_user_playlists(
     # Add song count to each playlist
     result = []
     for playlist in playlists:
-        song_count = db.query(PlaylistSong).filter(
-            PlaylistSong.playlist_id == playlist.id
+        song_count = db.query(PlaylistTrack).filter(
+            PlaylistTrack.playlist_id == playlist.id
         ).count()
 
         result.append(PlaylistResponse(
@@ -160,8 +160,8 @@ async def update_playlist(
     db.refresh(playlist)
 
     # Get song count
-    song_count = db.query(PlaylistSong).filter(
-        PlaylistSong.playlist_id == playlist.id
+    song_count = db.query(PlaylistTrack).filter(
+        PlaylistTrack.playlist_id == playlist.id
     ).count()
 
     return PlaylistResponse(
@@ -226,12 +226,12 @@ async def get_playlist_songs(
         )
 
     # Get songs in playlist with join
-    playlist_songs = db.query(PlaylistSong, Song).join(
-        Song, PlaylistSong.song_id == Song.id
+    playlist_songs = db.query(PlaylistTrack, Track).join(
+        Track, PlaylistTrack.track_id == Track.id
     ).filter(
-        PlaylistSong.playlist_id == playlist_id
+        PlaylistTrack.playlist_id == playlist_id
     ).order_by(
-        PlaylistSong.position
+        PlaylistTrack.position
     ).all()
 
     result = []
@@ -273,7 +273,7 @@ async def add_song_to_playlist(
         )
 
     # Verify song exists
-    song = db.query(Song).filter(Song.id == song_data.song_id).first()
+    song = db.query(Track).filter(Track.id == song_data.song_id).first()
     if not song:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -281,10 +281,10 @@ async def add_song_to_playlist(
         )
 
     # Check if song already in playlist
-    existing = db.query(PlaylistSong).filter(
+    existing = db.query(PlaylistTrack).filter(
         and_(
-            PlaylistSong.playlist_id == playlist_id,
-            PlaylistSong.song_id == song_data.song_id
+            PlaylistTrack.playlist_id == playlist_id,
+            PlaylistTrack.track_id == song_data.song_id
         )
     ).first()
 
@@ -295,14 +295,14 @@ async def add_song_to_playlist(
         )
 
     # Get max position for ordering
-    max_position = db.query(PlaylistSong).filter(
-        PlaylistSong.playlist_id == playlist_id
+    max_position = db.query(PlaylistTrack).filter(
+        PlaylistTrack.playlist_id == playlist_id
     ).count()
 
     # Add song to playlist
-    playlist_song = PlaylistSong(
+    playlist_song = PlaylistTrack(
         playlist_id=playlist_id,
-        song_id=song_data.song_id,
+        track_id=song_data.song_id,
         position=max_position
     )
     db.add(playlist_song)
@@ -339,10 +339,10 @@ async def remove_song_from_playlist(
         )
 
     # Find and delete the playlist-song relationship
-    playlist_song = db.query(PlaylistSong).filter(
+    playlist_song = db.query(PlaylistTrack).filter(
         and_(
-            PlaylistSong.playlist_id == playlist_id,
-            PlaylistSong.song_id == song_id
+            PlaylistTrack.playlist_id == playlist_id,
+            PlaylistTrack.track_id == song_id
         )
     ).first()
 
