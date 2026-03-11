@@ -39,6 +39,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check endpoint for Render
+@app.get("/")
+def health_check():
+    """Simple health check endpoint"""
+    return {
+        "status": "ok",
+        "message": "Music Tool API is running",
+        "version": "2.0.0"
+    }
+
 # Include routers
 app.include_router(auth_router)      # Authentication endpoints (/auth/*)
 app.include_router(playlist_router)  # Playlist endpoints (/playlists/*)
