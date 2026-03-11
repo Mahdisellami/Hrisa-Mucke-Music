@@ -18,6 +18,7 @@ import { api } from "@/api/client";
 import { parseLRC, getCurrentLyricIndex, LyricLine } from "@/utils/lrcParser";
 import { Icon } from "@/components/ui/Icon";
 import { IconButton } from "@/components/ui/Button";
+import { ShareSheet } from "@/components/social";
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from "@/constants/DesignTokens";
 
 export default function NowPlayingScreen() {
@@ -26,6 +27,7 @@ export default function NowPlayingScreen() {
   const [lyrics, setLyrics] = useState<string | null>(null);
   const [syncedLyrics, setSyncedLyrics] = useState<LyricLine[] | null>(null);
   const [loadingLyrics, setLoadingLyrics] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const lineRefs = useRef<{ [key: number]: View | null }>({});
   const {
@@ -295,7 +297,41 @@ export default function NowPlayingScreen() {
             />
             <Icon name="volume-high" size="sm" color={Colors.text.secondary} />
           </View>
+
+          {/* Secondary Actions */}
+          <View style={styles.secondaryActions}>
+            <IconButton
+              icon="list"
+              onPress={() => router.push('/queue' as any)}
+              size="md"
+              color={Colors.text.secondary}
+            />
+            <IconButton
+              icon="share-outline"
+              onPress={() => setShowShareSheet(true)}
+              size="md"
+              color={Colors.text.secondary}
+            />
+            <IconButton
+              icon="heart-outline"
+              onPress={() => {/* TODO: Add to favorites */}}
+              size="md"
+              color={Colors.text.secondary}
+            />
+          </View>
         </>
+      )}
+
+      {/* Share Sheet */}
+      {currentSong && (
+        <ShareSheet
+          visible={showShareSheet}
+          onClose={() => setShowShareSheet(false)}
+          type="track"
+          itemId={currentSong.id}
+          itemName={`${currentSong.title} by ${currentSong.artist}`}
+          onShareSuccess={() => console.log('Track shared successfully')}
+        />
       )}
     </SafeAreaView>
   );
@@ -446,6 +482,14 @@ const styles = StyleSheet.create({
   volumeSlider: {
     flex: 1,
     height: 40,
+  },
+  secondaryActions: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.xl,
+    paddingVertical: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
   },
   emptyState: {
     flex: 1,

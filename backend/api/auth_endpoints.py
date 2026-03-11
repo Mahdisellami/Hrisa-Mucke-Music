@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
-from models.db_models import User
+from models.db_models import User, Playlist
 from utils.database import get_db
 from utils.auth import (
     hash_password,
@@ -103,6 +103,15 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # Create default "favorites" playlist for the new user
+    favorites_playlist = Playlist(
+        name="favorites",
+        owner_id=new_user.id,
+        description="Your favorite tracks"
+    )
+    db.add(favorites_playlist)
+    db.commit()
 
     # Generate tokens
     access_token = create_access_token(data={"sub": str(new_user.id)})

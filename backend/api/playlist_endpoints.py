@@ -56,7 +56,7 @@ async def get_user_playlists(
     db: Session = Depends(get_db)
 ):
     """Get all playlists for the current user"""
-    playlists = db.query(Playlist).filter(Playlist.user_id == current_user.id).all()
+    playlists = db.query(Playlist).filter(Playlist.owner_id == current_user.id).all()
 
     # Add song count to each playlist
     result = []
@@ -86,7 +86,7 @@ async def create_playlist(
     # Check if playlist name already exists for this user
     existing = db.query(Playlist).filter(
         and_(
-            Playlist.user_id == current_user.id,
+            Playlist.owner_id == current_user.id,
             Playlist.name == playlist_data.name
         )
     ).first()
@@ -99,7 +99,7 @@ async def create_playlist(
 
     # Create new playlist
     new_playlist = Playlist(
-        user_id=current_user.id,
+        owner_id=current_user.id,
         name=playlist_data.name
     )
     db.add(new_playlist)
@@ -132,7 +132,7 @@ async def update_playlist(
             detail="Playlist not found"
         )
 
-    if playlist.user_id != current_user.id:
+    if playlist.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to modify this playlist"
@@ -141,7 +141,7 @@ async def update_playlist(
     # Check if new name conflicts with another playlist
     existing = db.query(Playlist).filter(
         and_(
-            Playlist.user_id == current_user.id,
+            Playlist.owner_id == current_user.id,
             Playlist.name == playlist_data.name,
             Playlist.id != playlist_id
         )
@@ -189,7 +189,7 @@ async def delete_playlist(
             detail="Playlist not found"
         )
 
-    if playlist.user_id != current_user.id:
+    if playlist.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to delete this playlist"
@@ -219,7 +219,7 @@ async def get_playlist_songs(
             detail="Playlist not found"
         )
 
-    if playlist.user_id != current_user.id:
+    if playlist.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to view this playlist"
@@ -266,7 +266,7 @@ async def add_song_to_playlist(
             detail="Playlist not found"
         )
 
-    if playlist.user_id != current_user.id:
+    if playlist.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to modify this playlist"
@@ -332,7 +332,7 @@ async def remove_song_from_playlist(
             detail="Playlist not found"
         )
 
-    if playlist.user_id != current_user.id:
+    if playlist.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You don't have permission to modify this playlist"

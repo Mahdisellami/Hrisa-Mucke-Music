@@ -19,6 +19,8 @@ export type IconName =
   | 'play-skip-back'
   | 'play-forward'
   | 'play-back'
+  | 'play-circle'
+  | 'play-circle-outline'
 
   // Navigation
   | 'arrow-back'
@@ -116,7 +118,23 @@ export type IconName =
   | 'ellipsis-horizontal'
   | 'ellipsis-vertical'
   | 'menu'
-  | 'menu-outline';
+  | 'menu-outline'
+
+  // People
+  | 'person'
+  | 'person-outline'
+  | 'person-circle'
+  | 'person-circle-outline'
+  | 'person-add'
+  | 'person-add-outline'
+  | 'people'
+  | 'people-outline'
+
+  // Special
+  | 'sparkles'
+  | 'sparkles-outline'
+  | 'star'
+  | 'star-outline';
 
 export type IconSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | number;
 

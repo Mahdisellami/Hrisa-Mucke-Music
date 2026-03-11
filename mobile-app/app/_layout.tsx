@@ -10,7 +10,8 @@ import { useMusicStore } from '@/store/musicStore';
 import { useAuthStore } from '@/store/authStore';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+  // Use new Spotify-style layout instead of tabs
+  anchor: '(main)',
 };
 
 export default function RootLayout() {
@@ -43,8 +44,8 @@ export default function RootLayout() {
       // User is not authenticated and not on auth screen, redirect to login
       router.replace('/auth/login');
     } else if (isAuthenticated && inAuthGroup) {
-      // User is authenticated but on auth screen, redirect to main app
-      router.replace('/(tabs)');
+      // User is authenticated but on auth screen, redirect to main app with Spotify layout
+      router.replace('/(main)/home');
     }
   }, [mounted, isAuthenticated, segments, isLoading, navigationState?.key]);
 
@@ -77,9 +78,32 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
+        {/* Auth screens */}
         <Stack.Screen name="auth/login" options={{ headerShown: false }} />
         <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+
+        {/* Main app with Spotify layout */}
+        <Stack.Screen name="(main)" options={{ headerShown: false }} />
+
+        {/* Keep old tabs for fallback (can be removed after testing) */}
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+
+        {/* Modal screens */}
+        <Stack.Screen
+          name="now-playing"
+          options={{
+            presentation: 'modal',
+            headerShown: false,
+            animation: 'slide_from_bottom',
+          }}
+        />
+        <Stack.Screen
+          name="queue"
+          options={{
+            presentation: 'modal',
+            title: 'Queue',
+          }}
+        />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar style="auto" />

@@ -34,7 +34,7 @@ class User(Base):
     ratings = relationship("TrackRating", back_populates="user", cascade="all, delete-orphan")
     followers = relationship("UserFollow", foreign_keys="UserFollow.following_id", back_populates="following_user")
     following = relationship("UserFollow", foreign_keys="UserFollow.follower_id", back_populates="follower_user")
-    activities = relationship("ActivityFeed", back_populates="user", cascade="all, delete-orphan")
+    activities = relationship("ActivityFeed", foreign_keys="ActivityFeed.user_id", back_populates="user", cascade="all, delete-orphan")
     collaborative_playlists = relationship("PlaylistCollaborator", back_populates="user", cascade="all, delete-orphan")
 
 

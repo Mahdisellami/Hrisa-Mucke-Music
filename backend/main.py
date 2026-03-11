@@ -4,6 +4,11 @@ from api.endpoints import router
 from api.auth_endpoints import router as auth_router
 from api.playlist_endpoints import router as playlist_router
 from api.analytics_endpoints import router as analytics_router
+from api.search_endpoints import router as search_router
+from api.discover_endpoints import router as discover_router
+from api.social_endpoints import router as social_router
+from api.recommendation_endpoints import router as recommendation_router
+from api.radio_endpoints import router as radio_router
 from utils.database import init_db
 import os
 
@@ -51,7 +56,12 @@ def health_check():
     }
 
 # Include routers
-app.include_router(auth_router)      # Authentication endpoints (/auth/*)
-app.include_router(playlist_router)  # Playlist endpoints (/playlists/*)
-app.include_router(analytics_router) # Analytics endpoints (/analytics/*)
-app.include_router(router)           # Existing music endpoints
+app.include_router(auth_router)           # Authentication endpoints (/api/auth/*)
+app.include_router(playlist_router)       # Playlist endpoints (/playlists/*)
+app.include_router(analytics_router)      # Analytics endpoints (/analytics/*)
+app.include_router(search_router)         # Search endpoints (/api/search/*)
+app.include_router(discover_router)       # Discovery endpoints (/api/discover/*)
+app.include_router(social_router)         # Social endpoints (/api/social/*)
+app.include_router(recommendation_router) # Recommendation endpoints (/api/recommendations/*)
+app.include_router(radio_router)          # Radio endpoints (/api/radio/*)
+app.include_router(router)                # Existing music endpoints
