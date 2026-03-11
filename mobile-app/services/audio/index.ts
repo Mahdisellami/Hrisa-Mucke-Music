@@ -1,21 +1,16 @@
-// Platform-specific audio service selector
-import { Platform } from 'react-native';
+// Web-only audio service
 import type { AudioServiceInterface } from './types';
 import { WebAudioService } from './WebAudioService';
-import { MobileAudioService } from './MobileAudioService';
 
 export * from './types';
+export { WebAudioService } from './WebAudioService';
 
-// Create singleton instance based on platform
+// Create singleton instance
 let audioServiceInstance: AudioServiceInterface | null = null;
 
 export const getAudioService = (): AudioServiceInterface => {
   if (!audioServiceInstance) {
-    if (Platform.OS === 'web') {
-      audioServiceInstance = new WebAudioService();
-    } else {
-      audioServiceInstance = new MobileAudioService();
-    }
+    audioServiceInstance = new WebAudioService();
   }
   return audioServiceInstance;
 };

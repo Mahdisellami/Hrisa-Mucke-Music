@@ -1,9 +1,7 @@
 import { create } from "zustand";
 import { api } from "@/api/client";
-import { Audio } from "expo-av";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Platform } from "react-native";
-import { WebAudioService } from "@/services/WebAudioService";
+import { WebAudioService } from "@/services/audio/WebAudioService";
 
 export interface Song {
   id?: number; // Song ID from database (optional for backwards compatibility)
@@ -45,7 +43,6 @@ export interface EQBands {
 interface MusicStore {
   songs: Song[];
   loading: boolean;
-  sound: Audio.Sound | null;
   currentSongIndex: number | null;
   isPlaying: boolean;
   queue: number[];
@@ -163,13 +160,12 @@ const SORT_MODE_KEY = "@sort_mode";
 const EQ_SETTINGS_KEY = "@eq_settings";
 
 let sleepTimerTimeout: NodeJS.Timeout | null = null;
-// Web Audio Service instance (only used on web platform)
-let webAudioService: WebAudioService | null = Platform.OS === 'web' ? new WebAudioService() : null;
+// Web Audio Service instance
+let webAudioService: WebAudioService = new WebAudioService();
 
 export const useMusicStore = create<MusicStore>((set, get) => ({
   songs: [],
   loading: false,
-  sound: null,
   currentSongIndex: null,
   isPlaying: false,
   queue: [],
@@ -592,188 +588,56 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
     // Track this song in recently played
     addToRecentlyPlayed(index);
 
-    // WEB PLATFORM: Use Web Audio API
-    if (Platform.OS === 'web' && webAudioService) {
-      try {
-        // If switching tracks, load new track
-        if (currentSongIndex !== index) {
-          await webAudioService.loadTrack(audioUrl);
-          webAudioService.setVolume(volume);
-          webAudioService.setPlaybackRate(playbackSpeed);
-          webAudioService.setEQ(eqBands);
-
-          // Set up event listeners
-          webAudioService.onTimeUpdate((time, duration) => {
-            set({ position: time * 1000, duration: duration * 1000 });
-          });
-
-          webAudioService.onEnded(() => {
-            set({ isPlaying: false, position: 0 });
-            get().playNext();
-          });
-
-          const newQueuePosition = queue.indexOf(index);
-          set({
-            currentSongIndex: index,
-            isPlaying: false,
-            queuePosition: newQueuePosition >= 0 ? newQueuePosition : queuePosition,
-            position: 0,
-          });
-          get().saveQueueState();
-        }
-
-        // Play the track
-        await webAudioService.play();
-        set({ isPlaying: true });
-
-        // Auto-set 8-hour timer if no timer is active
-        if (!sleepTimerEndTime) {
-          setSleepTimer(480);
-        }
-
-        return; // Exit early for web
-      } catch (error) {
-        console.error("Web audio playback error:", error);
-      }
-    }
-
-    // MOBILE PLATFORM: Continue with Expo AV below...
-
-    // Crossfade: fade out current track before stopping
-    if (sound && currentSongIndex !== index && crossfadeEnabled) {
-      try {
-        // Fade out over 2 seconds
-        await sound.setVolumeAsync(0, { duration: 2000 });
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      } catch (error) {
-        console.error("Crossfade error:", error);
-      }
-    }
-
-    if (sound && currentSongIndex !== index) {
-      await stopSound();
-    }
-
+    // Use Web Audio API
     try {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: true,
-        shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: false,
-      });
+      // If switching tracks, load new track
+      if (currentSongIndex !== index) {
+        await webAudioService.loadTrack(audioUrl);
+        webAudioService.setVolume(volume);
+        webAudioService.setPlaybackRate(playbackSpeed);
+        webAudioService.setEQ(eqBands);
 
-      if (sound && currentSongIndex === index) {
-        await sound.playAsync();
-        set({ isPlaying: true });
+        // Set up event listeners
+        webAudioService.onTimeUpdate((time, duration) => {
+          set({ position: time * 1000, duration: duration * 1000 });
+        });
 
-        // Auto-set 8-hour timer if no timer is active
-        if (!sleepTimerEndTime) {
-          setSleepTimer(480); // 480 minutes = 8 hours
-        }
+        webAudioService.onEnded(() => {
+          set({ isPlaying: false, position: 0 });
+          get().playNext();
+        });
 
-        return;
+        const newQueuePosition = queue.indexOf(index);
+        set({
+          currentSongIndex: index,
+          isPlaying: false,
+          queuePosition: newQueuePosition >= 0 ? newQueuePosition : queuePosition,
+          position: 0,
+        });
+        get().saveQueueState();
       }
 
-      const { sound: newSound } = await Audio.Sound.createAsync(
-        { uri: audioUrl },
-        {
-          shouldPlay: false,
-          rate: playbackSpeed,
-          shouldCorrectPitch: true,
-          volume: crossfadeEnabled ? 0 : volume,
-        }
-      );
-
-      const newQueuePosition = queue.indexOf(index);
-
-      // Update state with new sound before starting playback
-      set({
-        sound: newSound,
-        currentSongIndex: index,
-        isPlaying: false,
-        queuePosition: newQueuePosition >= 0 ? newQueuePosition : queuePosition,
-        position: 0,
-      });
-
-      // Save queue state after updating current song
-      get().saveQueueState();
-
-      // Start playback
-      await newSound.playAsync();
-
-      // Crossfade: fade in new track
-      if (crossfadeEnabled) {
-        await newSound.setVolumeAsync(volume, { duration: 2000 });
-      }
-
+      // Play the track
+      await webAudioService.play();
       set({ isPlaying: true });
 
       // Auto-set 8-hour timer if no timer is active
       if (!sleepTimerEndTime) {
-        setSleepTimer(480); // 480 minutes = 8 hours
+        setSleepTimer(480);
       }
-
-      newSound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          const { isSeekingInProgress } = get();
-
-          // Update position and duration
-          if (!isSeekingInProgress) {
-            set({
-              position: status.positionMillis || 0,
-              duration: status.durationMillis || 0,
-            });
-          }
-
-          // Handle track finish
-          if (status.didJustFinish) {
-            set({ isPlaying: false, position: 0 });
-            const { playNext } = get();
-            playNext();
-          }
-        }
-      });
     } catch (error) {
-      console.error("Error playing sound:", error);
+      console.error("Web audio playback error:", error);
     }
   },
 
   pauseSound: async () => {
-    // WEB: Use Web Audio API
-    if (Platform.OS === 'web' && webAudioService) {
-      webAudioService.pause();
-      set({ isPlaying: false });
-      return;
-    }
-
-    // MOBILE: Use Expo AV
-    const { sound } = get();
-    if (sound) {
-      await sound.pauseAsync();
-      set({ isPlaying: false });
-    }
+    webAudioService.pause();
+    set({ isPlaying: false });
   },
 
   stopSound: async () => {
-    // WEB: Use Web Audio API
-    if (Platform.OS === 'web' && webAudioService) {
-      webAudioService.stop();
-      set({ isPlaying: false, position: 0 });
-      return;
-    }
-
-    // MOBILE: Use Expo AV
-    const { sound } = get();
-    if (sound) {
-      try {
-        await sound.stopAsync();
-        await sound.unloadAsync();
-      } catch (error) {
-        console.error("Error stopping sound:", error);
-      } finally {
-        set({ sound: null, isPlaying: false, position: 0 });
-      }
-    }
+    webAudioService.stop();
+    set({ isPlaying: false, position: 0 });
   },
 
   playNext: async () => {
@@ -953,17 +817,8 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
 
   // Playback Speed Control
   setPlaybackSpeed: async (speed: number) => {
-    const { sound } = get();
-    if (sound) {
-      try {
-        await sound.setRateAsync(speed, true); // true = pitch correction
-        set({ playbackSpeed: speed });
-      } catch (error) {
-        console.error("Failed to set playback speed:", error);
-      }
-    } else {
-      set({ playbackSpeed: speed });
-    }
+    webAudioService.setPlaybackRate(speed);
+    set({ playbackSpeed: speed });
   },
 
   // Crossfade Toggle
@@ -1007,25 +862,8 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
 
   // Seek Control
   seekToPosition: async (positionMillis: number) => {
-    // WEB: Use Web Audio API
-    if (Platform.OS === 'web' && webAudioService) {
-      webAudioService.seek(positionMillis / 1000); // Convert to seconds
-      set({ position: positionMillis });
-      return;
-    }
-
-    // MOBILE: Use Expo AV
-    const { sound } = get();
-    if (sound) {
-      try {
-        set({ isSeekingInProgress: true });
-        await sound.setPositionAsync(positionMillis);
-        set({ position: positionMillis, isSeekingInProgress: false });
-      } catch (error) {
-        console.error("Failed to seek:", error);
-        set({ isSeekingInProgress: false });
-      }
-    }
+    webAudioService.seek(positionMillis / 1000); // Convert to seconds
+    set({ position: positionMillis });
   },
 
   // Volume Control
@@ -1038,25 +876,8 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
       ? clampedVolume * 0.85
       : clampedVolume;
 
-    // WEB: Use Web Audio API
-    if (Platform.OS === 'web' && webAudioService) {
-      webAudioService.setVolume(actualVolume);
-      set({ volume: clampedVolume });
-      return;
-    }
-
-    // MOBILE: Use Expo AV
-    const { sound } = get();
-    if (sound) {
-      try {
-        await sound.setVolumeAsync(actualVolume);
-        set({ volume: clampedVolume });
-      } catch (error) {
-        console.error("Failed to set volume:", error);
-      }
-    } else {
-      set({ volume: clampedVolume });
-    }
+    webAudioService.setVolume(actualVolume);
+    set({ volume: clampedVolume });
   },
 
   toggleVolumeNormalization: async () => {
@@ -1146,22 +967,11 @@ export const useMusicStore = create<MusicStore>((set, get) => ({
   applyEQToSound: async () => {
     const { eqBands } = get();
 
-    // WEB: Apply EQ using Web Audio API
-    if (Platform.OS === 'web' && webAudioService) {
-      try {
-        webAudioService.setEQ(eqBands);
-        console.log("✅ EQ applied on web:", eqBands);
-        return;
-      } catch (error) {
-        console.error("Error applying web EQ:", error);
-      }
+    try {
+      webAudioService.setEQ(eqBands);
+      console.log("✅ EQ applied:", eqBands);
+    } catch (error) {
+      console.error("Error applying EQ:", error);
     }
-
-    // MOBILE: Expo AV doesn't have native EQ support
-    // Settings are stored and will be applied if we migrate to react-native-track-player in the future
-    const { sound } = get();
-    if (!sound) return;
-
-    console.log("📝 EQ settings stored for mobile (not applied - Expo AV limitation):", eqBands);
   },
 }));

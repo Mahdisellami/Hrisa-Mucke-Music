@@ -9,7 +9,7 @@ import {
   TextInput,
   Switch,
 } from "react-native";
-import Slider from "@react-native-community/slider";
+import { WebSlider as Slider } from "@/components/ui/WebSlider";
 import { useMusicStore } from "@/store/musicStore";
 
 interface PlaybackSettingsProps {

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import Slider from "@react-native-community/slider";
+import { WebSlider as Slider } from "@/components/ui/WebSlider";
 import { useMusicStore } from "@/store/musicStore";
 import { useRouter } from "expo-router";
 import { ProgressBar } from "./ProgressBar";

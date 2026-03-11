@@ -10,7 +10,7 @@ import {
   Modal,
   Alert,
 } from "react-native";
-import Slider from "@react-native-community/slider";
+import { WebSlider as Slider } from "@/components/ui/WebSlider";
 import { useMusicStore, EQPreset, EQBands } from "@/store/musicStore";
 import { useAuthStore } from "@/store/authStore";
 

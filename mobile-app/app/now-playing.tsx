@@ -13,7 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useMusicStore } from "@/store/musicStore";
 import { ProgressBar } from "@/components/ProgressBar";
-import Slider from "@react-native-community/slider";
+import { WebSlider as Slider } from "@/components/ui/WebSlider";
 import { api } from "@/api/client";
 import { parseLRC, getCurrentLyricIndex, LyricLine } from "@/utils/lrcParser";
 import { Icon } from "@/components/ui/Icon";
