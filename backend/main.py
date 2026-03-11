@@ -19,6 +19,7 @@ def startup_event():
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
 default_origins = [
     "http://localhost:8081",
+    "http://localhost:8082",
     "http://192.168.2.155:8081",
     "http://localhost:3000",
 ]
