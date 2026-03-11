@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack, useRouter, useSegments, useRootNavigationState } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { useEffect } from 'react';
@@ -17,6 +17,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const segments = useSegments();
+  const navigationState = useRootNavigationState();
   const { isPlaying, playSound, pauseSound, currentSongIndex, songs } = useMusicStore();
   const { isAuthenticated, isLoading, loadStoredTokens } = useAuthStore();
 
@@ -27,7 +28,8 @@ export default function RootLayout() {
 
   // Auth redirect logic
   useEffect(() => {
-    if (isLoading) return; // Wait for token loading to complete
+    // Wait for navigation to be ready, token loading to complete
+    if (!navigationState?.key || isLoading) return;
 
     const inAuthGroup = segments[0] === 'auth';
 
@@ -38,7 +40,7 @@ export default function RootLayout() {
       // User is authenticated but on auth screen, redirect to main app
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated, segments, isLoading]);
+  }, [isAuthenticated, segments, isLoading, navigationState?.key]);
 
   // Space bar to play/pause (web only)
   useEffect(() => {

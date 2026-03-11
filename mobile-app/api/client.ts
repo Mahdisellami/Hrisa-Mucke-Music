@@ -6,9 +6,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const BACKEND_URL_KEY = "@backend_url";
 const ACCESS_TOKEN_KEY = "@access_token";
 
-// Use production backend for web, local IP for mobile
+// Use localhost for web development, production for web build
 const DEFAULT_BACKEND_URL = Platform.OS === "web"
-  ? "https://music-tool-backend.onrender.com"
+  ? (process.env.NODE_ENV === "development"
+      ? "http://localhost:8000"
+      : "https://music-tool-backend.onrender.com")
   : "http://192.168.2.155:8000";
 
 // Create axios instance with default URL
