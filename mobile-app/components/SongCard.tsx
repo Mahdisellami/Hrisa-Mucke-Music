@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity, Modal, Image, TextInput, Aler
 import { AudioPlayer } from "./AudioPlayer";
 import { useMusicStore } from "@/store/musicStore";
 import { usePlaylistStore } from "@/store/playlistStore";
-import { shareSong } from "@/utils/shareUtils";
 import { Icon } from "./ui/Icon";
 import { IconButton, PrimaryButton, SecondaryButton, DangerButton } from "./ui/Button";
 import { Colors, Typography, Spacing, BorderRadius, Shadows } from "@/constants/DesignTokens";

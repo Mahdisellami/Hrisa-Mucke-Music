@@ -15,8 +15,6 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { SongCard } from "@/components/SongCard";
 import { MiniPlayer } from "@/components/MiniPlayer";
 import { SortModal } from "@/components/SortModal";
-import { ShareModal } from "@/components/ShareModal";
-import { sharePlaylistAsText, sharePlaylistAsM3U, sharePlaylistAsJSON } from "@/utils/shareUtils";
 import { Icon } from "@/components/ui/Icon";
 import { IconButton, PrimaryButton, SecondaryButton } from "@/components/ui/Button";
 import { Colors, Typography, Spacing, BorderRadius } from "@/constants/DesignTokens";
